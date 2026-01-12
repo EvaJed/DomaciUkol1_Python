@@ -1,0 +1,57 @@
+import math
+
+class Locality:
+    def __init__(self, name, locality_coefficient):
+        self.name = name
+        self.locality_coefficient = locality_coefficient
+
+class Property:
+    def __init__(self, locality):
+        self.locality = locality
+
+class Estate(Property):
+    def __init__(self, locality, estate_type, area):
+        super().__init__(locality)
+        self.estate_type = estate_type
+        self.area = area
+
+        # Koeficienty pro různé typy pozemků
+        self.type_coefficients = {
+            "land": 0.85,
+            "building site": 9,
+            "forrest": 0.35,
+            "garden": 2
+        }
+
+    def calculate_tax(self):
+        coef = self.type_coefficients[self.estate_type]
+        tax = self.area * coef * self.locality.locality_coefficient
+        return math.ceil(tax)
+
+class Residence(Property):
+    def __init__(self, locality, area, commercial=False):
+        super().__init__(locality)
+        self.area = area
+        self.commercial = commercial
+
+    def calculate_tax(self):
+        tax = self.area * self.locality.locality_coefficient * 15
+        if self.commercial:
+            tax = tax * 2
+        return math.ceil(tax)
+
+# --- TESTOVÁNÍ (příklady ze zadání) ---
+
+# 1. Lokality
+manetin = Locality("Manětín", 0.8)
+brno = Locality("Brno", 3)
+
+# 2. Nemovitosti
+zemedelsky_pozemek = Estate(manetin, "land", 900)
+dum = Residence(manetin, 120)
+kancelar = Residence(brno, 90, commercial=True)
+
+# 3. Výpisy
+print(f"Daň ze zemědělského pozemku (Manětín): {zemedelsky_pozemek.calculate_tax()} Kč")
+print(f"Daň z domu (Manětín): {dum.calculate_tax()} Kč")
+print(f"Daň z kanceláře (Brno): {kancelar.calculate_tax()} Kč")
